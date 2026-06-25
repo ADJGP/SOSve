@@ -450,78 +450,127 @@
         <div class="code-block-wrapper">
           <button class="btn-copy" onclick="copyAppsScript()" id="btnCopyScript">📋 Copiar código</button>
           <pre class="code-block" id="appsScriptCode">
+// =====================================================
 // Google Apps Script para SOS Venezuela
-// Pega este código en Extensiones > Apps Script en tu hoja de cálculo
-// Luego despliega como Web App: Implementar > Nueva implementación
-// Acceso: Cualquier persona, incluso anónimos
+// =====================================================
+// INSTRUCCIONES:
+// 1. Ve a tu hoja de cálculo → Extensiones → Apps Script
+// 2. Borra todo el contenido y pega ESTE código completo
+// 3. Haz clic en Implementar → Nueva implementación
+//    - Tipo: Aplicación web
+//    - Ejecutar como: YO (tu cuenta)
+//    - Acceso: CUALQUIER PERSONA (incluso anónimos) ← MUY IMPORTANTE
+// 4. Copia la URL generada y pégala en el campo "URL del Web App"
+// =====================================================
 
 const SHEET_REGISTROS = 'Registros';
-const SHEET_ANUNCIOS = 'Anuncios';
+const SHEET_ANUNCIOS  = 'Anuncios';
 
-function doPost(e) {
-  const data = JSON.parse(e.postData.contents);
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  
-  if (data.tipo === 'registro') {
-    const sheet = ss.getSheetByName(SHEET_REGISTROS) || ss.insertSheet(SHEET_REGISTROS);
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow(['Timestamp','Nombre','Edad','TipoPersn','Genero','Cedula','Telefono',
-        'Estado','Municipio','Direccion','EstadoSalud','TipoRegistro','DescSalud',
-        'ReporterNombre','ReporterContacto','Notas','ID']);
-    }
-    const id = 'R' + Date.now();
-    sheet.appendRow([
-      new Date().toISOString(), data.nombreCompleto, data.edad, data.tipoPersn,
-      data.genero, data.cedula, data.telefono, data.estadoUbic, data.municipio,
-      data.direccion, data.estadoSalud, data.tipoRegistro, data.descripcionSalud,
-      data.reporterNombre, data.reporterTelefono, data.notasAdicionales, id
-    ]);
-    return ContentService.createTextOutput(JSON.stringify({ok: true, id}))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-  
-  if (data.tipo === 'anuncio') {
-    const sheet = ss.getSheetByName(SHEET_ANUNCIOS) || ss.insertSheet(SHEET_ANUNCIOS);
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow(['Timestamp','NombreBuscado','Edad','Estado','Ubicacion',
-        'Descripcion','Contacto','NombreReporter','ID']);
-    }
-    const id = 'A' + Date.now();
-    sheet.appendRow([
-      new Date().toISOString(), data.anuncioNombre, data.anuncioEdad,
-      data.anuncioEstado, data.anuncioUbicacion, data.anuncioDescripcion,
-      data.anuncioContacto, data.anuncioNombreReporter, id
-    ]);
-    return ContentService.createTextOutput(JSON.stringify({ok: true, id}))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-  
-  return ContentService.createTextOutput(JSON.stringify({ok: false, error: 'Tipo desconocido'}))
+// Cabeceras CORS — necesarias para acceso desde el navegador
+function corsOutput(body) {
+  return ContentService
+    .createTextOutput(body)
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-function doGet(e) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const tipo = e.parameter.tipo || 'registros';
-  
-  const sheetName = tipo === 'anuncios' ? SHEET_ANUNCIOS : SHEET_REGISTROS;
-  const sheet = ss.getSheetByName(sheetName);
-  
-  if (!sheet || sheet.getLastRow() <= 1) {
-    return ContentService.createTextOutput(JSON.stringify({ok: true, data: []}))
-      .setMimeType(ContentService.MimeType.JSON);
+// Maneja peticiones OPTIONS (preflight CORS) — algunos navegadores las envían
+function doOptions(e) {
+  return corsOutput('{}');
+}
+
+function doPost(e) {
+  try {
+    // El cliente envía Content-Type: text/plain para evitar preflight CORS
+    const data = JSON.parse(e.postData.contents);
+    const ss   = SpreadsheetApp.getActiveSpreadsheet();
+
+    if (data.tipo === 'registro') {
+      const sheet = ss.getSheetByName(SHEET_REGISTROS) || ss.insertSheet(SHEET_REGISTROS);
+      // Crear encabezados si la hoja está vacía
+      if (sheet.getLastRow() === 0) {
+        sheet.appendRow([
+          'Timestamp','Nombre','Edad','TipoPersn','Genero','Cedula','Telefono',
+          'Estado','Municipio','Direccion','EstadoSalud','TipoRegistro','DescSalud',
+          'ReporterNombre','ReporterContacto','Notas','ID'
+        ]);
+      }
+      const id = 'R' + Date.now();
+      sheet.appendRow([
+        new Date().toISOString(),
+        data.nombreCompleto  || '',
+        data.edad            || '',
+        data.tipoPersn       || '',
+        data.genero          || '',
+        data.cedula          || '',
+        data.telefono        || '',
+        data.estadoUbic      || '',
+        data.municipio       || '',
+        data.direccion       || '',
+        data.estadoSalud     || '',
+        data.tipoRegistro    || '',
+        data.descripcionSalud|| '',
+        data.reporterNombre  || '',
+        data.reporterTelefono|| '',
+        data.notasAdicionales|| '',
+        id
+      ]);
+      return corsOutput(JSON.stringify({ ok: true, id }));
+    }
+
+    if (data.tipo === 'anuncio') {
+      const sheet = ss.getSheetByName(SHEET_ANUNCIOS) || ss.insertSheet(SHEET_ANUNCIOS);
+      if (sheet.getLastRow() === 0) {
+        sheet.appendRow([
+          'Timestamp','NombreBuscado','Edad','Estado',
+          'Ubicacion','Descripcion','Contacto','NombreReporter','ID'
+        ]);
+      }
+      const id = 'A' + Date.now();
+      sheet.appendRow([
+        new Date().toISOString(),
+        data.anuncioNombre        || '',
+        data.anuncioEdad          || '',
+        data.anuncioEstado        || '',
+        data.anuncioUbicacion     || '',
+        data.anuncioDescripcion   || '',
+        data.anuncioContacto      || '',
+        data.anuncioNombreReporter|| '',
+        id
+      ]);
+      return corsOutput(JSON.stringify({ ok: true, id }));
+    }
+
+    return corsOutput(JSON.stringify({ ok: false, error: 'Tipo desconocido: ' + data.tipo }));
+
+  } catch (err) {
+    return corsOutput(JSON.stringify({ ok: false, error: err.message }));
   }
-  
-  const rows = sheet.getDataRange().getValues();
-  const headers = rows[0];
-  const data = rows.slice(1).map(row => {
-    const obj = {};
-    headers.forEach((h, i) => { obj[h] = row[i]; });
-    return obj;
-  });
-  
-  return ContentService.createTextOutput(JSON.stringify({ok: true, data}))
-    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doGet(e) {
+  try {
+    const ss   = SpreadsheetApp.getActiveSpreadsheet();
+    const tipo = (e.parameter && e.parameter.tipo) || 'registros';
+
+    const sheetName = tipo === 'anuncios' ? SHEET_ANUNCIOS : SHEET_REGISTROS;
+    const sheet     = ss.getSheetByName(sheetName);
+
+    if (!sheet || sheet.getLastRow() <= 1) {
+      return corsOutput(JSON.stringify({ ok: true, data: [] }));
+    }
+
+    const rows    = sheet.getDataRange().getValues();
+    const headers = rows[0];
+    const data    = rows.slice(1).map(row => {
+      const obj = {};
+      headers.forEach((h, i) => { obj[String(h)] = String(row[i] !== undefined ? row[i] : ''); });
+      return obj;
+    });
+
+    return corsOutput(JSON.stringify({ ok: true, data }));
+  } catch (err) {
+    return corsOutput(JSON.stringify({ ok: false, error: err.message }));
+  }
 }
           </pre>
         </div>

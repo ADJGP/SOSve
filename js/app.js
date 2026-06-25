@@ -73,18 +73,52 @@ async function testConnection() {
   showMsg('configMsg', '', '');
   document.getElementById('configMsg').classList.add('hidden');
 
+  // Leer valores frescos del formulario (pueden no haberse guardado aún)
+  const sid  = getVal('cfgSheetId').trim();
+  const akey = getVal('cfgApiKey').trim();
+  const wurl = getVal('cfgWebAppUrl').trim();
+
   try {
-    const url = buildReadUrl('registros');
-    const res = await fetch(url);
-    const data = await res.json();
-    if (data.ok !== undefined || Array.isArray(data.values)) {
-      showMsg('configMsg', 'success', '✅ Conexión exitosa con Google Sheets.');
-      toast('Conexión exitosa', 'success');
-    } else {
-      throw new Error('Respuesta inesperada de la API.');
+    // --- Estrategia 1: probar el Web App (si está configurado) ---
+    if (wurl) {
+      const res  = await fetch(`${wurl}?tipo=registros`);
+      if (!res.ok) throw new Error(`Apps Script devolvió HTTP ${res.status}. Verifica que el Web App esté publicado como acceso "Cualquier persona"`);
+      const json = await res.json();
+      if (json.ok !== undefined) {
+        showMsg('configMsg', 'success', `✅ Conexión exitosa con el Web App de Apps Script. ${json.data ? json.data.length + ' registros encontrados.' : 'Hoja lista.'}`);
+        toast('Conexión exitosa ✅', 'success');
+        return;
+      }
+      throw new Error('El Apps Script respondió un formato inesperado. Asegúrate de haber pegado el código correcto.');
     }
+
+    // --- Estrategia 2: probar la Sheets API directamente ---
+    if (!sid || !akey) {
+      throw new Error('Completa el ID de la hoja y la API Key antes de probar.');
+    }
+    const sheetName = getVal('cfgSheetRegistros').trim() || 'Registros';
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/${encodeURIComponent(sheetName)}?key=${akey}`;
+    const res  = await fetch(url);
+    const json = await res.json();
+
+    if (json.error) {
+      // Google devuelve {error: {code, message, status}}
+      const code = json.error.code || '';
+      const msg  = json.error.message || 'Error desconocido';
+      if (code === 403) throw new Error(`403 – Acceso denegado. Asegúrate de que la hoja esté compartida públicamente ("Cualquier persona con el enlace puede ver") y que la API Key tenga permiso para Sheets API.`);
+      if (code === 400) throw new Error(`400 – ID de hoja inválido. Revisa que copiaste el ID correcto (la parte entre /d/ y /edit en la URL).`);
+      if (code === 404) throw new Error(`404 – Hoja "${sheetName}" no encontrada. Verifica que la pestaña de la hoja se llame exactamente "Registros" (con mayúscula).`);
+      throw new Error(`Google Sheets API: ${msg} (código ${code})`);
+    }
+
+    // values puede no existir si la hoja está vacía — eso es válido
+    const count = json.values ? json.values.length - 1 : 0;
+    showMsg('configMsg', 'success', `✅ Conexión exitosa con Google Sheets. ${count > 0 ? count + ' registros encontrados.' : 'Hoja vacía, lista para recibir datos.'}`);
+    toast('Conexión exitosa ✅', 'success');
+
   } catch (e) {
-    showMsg('configMsg', 'error', '❌ Error de conexión: ' + e.message + '. Verifica el ID de hoja y API Key.');
+    showMsg('configMsg', 'error', '❌ ' + e.message);
+    toast('Error de conexión', 'error');
   } finally {
     btn.disabled = false;
     btn.textContent = '🔌 Probar conexión';
@@ -138,15 +172,22 @@ async function fetchSheetData(tipo) {
   if (config.webAppUrl) {
     const url = `${config.webAppUrl}?tipo=${tipo}`;
     const res = await fetch(url);
+    if (!res.ok) throw new Error(`Apps Script HTTP ${res.status}`);
     const json = await res.json();
-    if (json.ok) return normalizeRows(json.data || []);
-    throw new Error(json.error || 'Error en Apps Script');
+    if (json.ok !== undefined) return normalizeRows(json.data || []);
+    throw new Error(json.error || 'Respuesta inesperada del Apps Script');
   }
 
   /* Lectura pública vía Sheets API v4 */
-  const url = buildReadUrl(tipo);
+  const url  = buildReadUrl(tipo);
   const res  = await fetch(url);
   const json = await res.json();
+
+  if (json.error) {
+    const code = json.error.code || '';
+    const msg  = json.error.message || 'Error de API';
+    throw new Error(`Sheets API ${code}: ${msg}`);
+  }
   return parseSheetApi(json);
 }
 
@@ -156,12 +197,13 @@ function buildReadUrl(tipo) {
 }
 
 function parseSheetApi(json) {
+  // json.values puede estar ausente si la hoja está vacía — es válido
   const values = json.values || [];
   if (values.length < 2) return [];
   const headers = values[0];
   return values.slice(1).map(row => {
     const obj = {};
-    headers.forEach((h, i) => { obj[h] = row[i] || ''; });
+    headers.forEach((h, i) => { obj[h] = row[i] !== undefined ? String(row[i]) : ''; });
     return obj;
   });
 }
@@ -305,12 +347,26 @@ function validateRegistro(data) {
    ============================== */
 async function postData(data) {
   if (!config.webAppUrl) throw new Error('URL del Web App no configurada.');
+
+  // Google Apps Script requiere que los datos se envíen como texto plano
+  // (Content-Type: text/plain) para evitar el preflight CORS que bloquea el navegador.
   const res = await fetch(config.webAppUrl, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify(data)
   });
-  const json = await res.json();
+
+  if (!res.ok) {
+    throw new Error(`El servidor respondió con error HTTP ${res.status}. Verifica que el Web App esté publicado con acceso "Cualquier persona".`);
+  }
+
+  let json;
+  try {
+    json = await res.json();
+  } catch {
+    throw new Error('La respuesta del Apps Script no es JSON válido. Verifica el código del Web App.');
+  }
+
   if (!json.ok) throw new Error(json.error || 'Error en el servidor.');
   return json;
 }
