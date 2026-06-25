@@ -10,6 +10,7 @@
    ============================== */
 let registros = [];
 let anuncios  = [];
+let comentarios = [];
 
 // ⚠️ IMPORTANTE: Coloca aquí tus datos para que funcione para todos los usuarios
 let config = {
@@ -145,12 +146,14 @@ async function loadData() {
 
   setBtnState('btnRegistrar', true, '⏳ Cargando…');
   try {
-    const [resReg, resAnun] = await Promise.all([
+    const [resReg, resAnun, resCom] = await Promise.all([
       fetchSheetData('registros'),
-      fetchSheetData('anuncios')
+      fetchSheetData('anuncios'),
+      fetchSheetData('comentarios')
     ]);
     registros = resReg;
     anuncios  = resAnun;
+    comentarios = resCom;
     updateStats();
     renderAnuncios();
     renderEstadosGrid();
@@ -168,14 +171,16 @@ async function loadData() {
 async function loadDataBackground() {
   if (!config.sheetId || !config.apiKey) return;
   try {
-    const [resReg, resAnun] = await Promise.all([
+    const [resReg, resAnun, resCom] = await Promise.all([
       fetchSheetData('registros'),
-      fetchSheetData('anuncios')
+      fetchSheetData('anuncios'),
+      fetchSheetData('comentarios')
     ]);
     
     // Actualizar estado global
     registros = resReg;
     anuncios  = resAnun;
+    comentarios = resCom;
     
     // Actualizar estadísticas sin interrumpir
     updateStats();
@@ -223,13 +228,16 @@ async function fetchSheetData(tipo) {
   if (json.error) {
     const code = json.error.code || '';
     const msg  = json.error.message || 'Error de API';
+    if (code === 400 && tipo === 'comentarios') return []; // Hoja de comentarios no creada aún
     throw new Error(`Sheets API ${code}: ${msg}`);
   }
   return parseSheetApi(json);
 }
 
 function buildReadUrl(tipo) {
-  const sheetName = tipo === 'anuncios' ? config.sheetAnuncios : config.sheetRegistros;
+  let sheetName = config.sheetRegistros;
+  if (tipo === 'anuncios') sheetName = config.sheetAnuncios;
+  if (tipo === 'comentarios') sheetName = 'Comentarios';
   return `https://sheets.googleapis.com/v4/spreadsheets/${config.sheetId}/values/${encodeURIComponent(sheetName)}?key=${config.apiKey}`;
 }
 
@@ -500,7 +508,33 @@ function renderRecordCard(r) {
       <div class="record-actions">
         <span class="record-timestamp">${ts}</span>
       </div>
+      ${renderCommentsHTML(r.ID)}
     </div>`;
+}
+
+function renderCommentsHTML(parentId) {
+  if (!parentId) return '';
+  const relComs = comentarios.filter(c => c.ParentID === parentId);
+  const addBtn = `<button class="btn-comment" onclick="openCommentModal('${parentId}')">💬 Agregar actualización / comentario</button>`;
+  
+  if (!relComs.length) return `<div class="comments-section">${addBtn}</div>`;
+  
+  const tags = relComs.map(c => `
+    <div class="comment-item">
+      <div class="comment-header">
+        <span class="comment-autor">${escHtml(c.Autor)}</span>
+        <span class="comment-ts">${c.Timestamp ? formatDate(c.Timestamp) : ''}</span>
+      </div>
+      <div class="comment-text">${escHtml(c.Comentario)}</div>
+    </div>
+  `).join('');
+  
+  return `
+    <div class="comments-section">
+      <div class="comments-list">${tags}</div>
+      ${addBtn}
+    </div>
+  `;
 }
 
 /* ==============================
@@ -533,6 +567,7 @@ function renderAnuncios(filter = '') {
           ${a.Estado || a.Ubicacion ? `<span class="anuncio-ubicacion">📍 ${escHtml(a.Estado || '')}${a.Ubicacion ? ` · ${escHtml(a.Ubicacion)}` : ''}</span>` : ''}
         </div>
         ${a.NombreReporter ? `<div style="font-size:0.72rem;color:var(--gray-400);margin-top:0.4rem">Publicado por: ${escHtml(a.NombreReporter)}</div>` : ''}
+        ${renderCommentsHTML(a.ID)}
       </div>`;
   }).join('');
 }
@@ -666,6 +701,62 @@ function showModal(title, msg, id) {
 
 function closeModal() {
   document.getElementById('modalExito').classList.add('hidden');
+}
+
+/* ==============================
+   COMENTARIOS MODAL
+   ============================== */
+function openCommentModal(parentId) {
+  document.getElementById('commentParentId').value = parentId;
+  document.getElementById('commentTexto').value = '';
+  document.getElementById('modalComentario').classList.remove('hidden');
+}
+
+function closeCommentModal() {
+  document.getElementById('modalComentario').classList.add('hidden');
+}
+
+async function submitComment(e) {
+  e.preventDefault();
+  
+  const parentId = document.getElementById('commentParentId').value;
+  const autor = document.getElementById('commentAutor').value.trim();
+  const texto = document.getElementById('commentTexto').value.trim();
+  
+  if (!autor || !texto) {
+    toast('Todos los campos son obligatorios', 'error');
+    return;
+  }
+  
+  const btn = document.getElementById('btnSubmitComment');
+  const orgText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '⏳ Publicando...';
+  
+  const data = {
+    tipo: 'comentario',
+    parentId,
+    autor,
+    texto
+  };
+  
+  try {
+    if (isMockMode || !config.webAppUrl) {
+      comentarios.push({ ...data, Timestamp: new Date().toISOString(), Comentario: texto, Autor: autor, ParentID: parentId });
+    } else {
+      await postData(data);
+      // Descargamos fresco en background enseguida
+      if (!isMockMode) setTimeout(loadDataBackground, 500); 
+    }
+    
+    closeCommentModal();
+    toast('Comentario agregado exitosamente', 'success');
+  } catch (err) {
+    toast('Error al publicar: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = orgText;
+  }
 }
 
 /* ==============================

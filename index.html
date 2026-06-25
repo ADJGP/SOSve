@@ -465,6 +465,7 @@
 
 const SHEET_REGISTROS = 'Registros';
 const SHEET_ANUNCIOS  = 'Anuncios';
+const SHEET_COMENTARIOS = 'Comentarios';
 
 // Cabeceras CORS — necesarias para acceso desde el navegador
 function corsOutput(body) {
@@ -540,6 +541,20 @@ function doPost(e) {
       return corsOutput(JSON.stringify({ ok: true, id }));
     }
 
+    if (data.tipo === 'comentario') {
+      const sheet = ss.getSheetByName(SHEET_COMENTARIOS) || ss.insertSheet(SHEET_COMENTARIOS);
+      if (sheet.getLastRow() === 0) {
+        sheet.appendRow(['Timestamp','ParentID','Autor','Comentario']);
+      }
+      sheet.appendRow([
+        new Date().toISOString(),
+        data.parentId || '',
+        data.autor    || '',
+        data.texto    || ''
+      ]);
+      return corsOutput(JSON.stringify({ ok: true }));
+    }
+
     return corsOutput(JSON.stringify({ ok: false, error: 'Tipo desconocido: ' + data.tipo }));
 
   } catch (err) {
@@ -552,8 +567,11 @@ function doGet(e) {
     const ss   = SpreadsheetApp.getActiveSpreadsheet();
     const tipo = (e.parameter && e.parameter.tipo) || 'registros';
 
-    const sheetName = tipo === 'anuncios' ? SHEET_ANUNCIOS : SHEET_REGISTROS;
-    const sheet     = ss.getSheetByName(sheetName);
+    let sheetName = SHEET_REGISTROS;
+    if (tipo === 'anuncios') sheetName = SHEET_ANUNCIOS;
+    if (tipo === 'comentarios') sheetName = SHEET_COMENTARIOS;
+    
+    const sheet = ss.getSheetByName(sheetName);
 
     if (!sheet || sheet.getLastRow() <= 1) {
       return corsOutput(JSON.stringify({ ok: true, data: [] }));
@@ -603,6 +621,31 @@ function doGet(e) {
       <p>Open source — Datos alojados en Google Sheets. <span id="lastUpdate"></span></p>
     </div>
   </footer>
+
+  <!-- MODAL DE COMENTARIO -->
+  <div id="modalComentario" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalComentarioTitle">
+    <div class="modal-overlay" onclick="closeCommentModal()"></div>
+    <div class="modal-box" style="text-align: left;">
+      <h3 id="modalComentarioTitle">📝 Agregar un comentario / actualización</h3>
+      <p style="font-size: 0.9rem; color: var(--gray-600); margin-bottom: 1rem;">Agrega información nueva, avistamientos o correcciones.</p>
+      
+      <form id="commentForm" onsubmit="submitComment(event)">
+        <input type="hidden" id="commentParentId" />
+        <div class="form-group required">
+          <label for="commentAutor">Tu nombre y contacto</label>
+          <input type="text" id="commentAutor" placeholder="Ej: Pedro Pérez - 0412-1234567" required />
+        </div>
+        <div class="form-group required">
+          <label for="commentTexto">Comentario</label>
+          <textarea id="commentTexto" rows="3" placeholder="Escribe aquí tu actualización..." required></textarea>
+        </div>
+        <div class="form-footer" style="padding: 0; box-shadow: none;">
+          <button type="button" class="btn-secondary" onclick="closeCommentModal()">Cancelar</button>
+          <button type="submit" class="btn-primary" id="btnSubmitComment">Publicar comentario</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- MODAL DE REGISTRO EXITOSO -->
   <div id="modalExito" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">

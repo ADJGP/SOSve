@@ -647,6 +647,60 @@ input.error, select.error, textarea.error { border-color: var(--red-border); }
   white-space: nowrap;
 }
 
+/* ---- COMMENTS ---- */
+.comments-section {
+  grid-column: 1 / -1;
+  border-top: 1px dashed var(--gray-200);
+  padding-top: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.comment-item {
+  background: var(--gray-100);
+  border-left: 3px solid var(--black);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  margin-bottom: 0.2rem;
+}
+
+.comment-autor { font-weight: 700; color: var(--black); }
+.comment-ts { color: var(--gray-500); }
+.comment-text { font-size: 0.85rem; color: var(--gray-800); line-height: 1.4; }
+
+.btn-comment {
+  background: none;
+  border: 1px solid var(--gray-200);
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all var(--transition);
+}
+
+.btn-comment:hover {
+  background: var(--gray-100);
+  border-color: var(--black);
+  color: var(--black);
+}
+
 /* ---- ESTADOS GRID ---- */
 .estados-grid {
   display: grid;
