@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SOS Venezuela - Registro de Personas tras el Sismo | Venezuela Earthquake Registry</title>
+  <meta name="description" content="Plataforma de emergencia para el registro de personas encontradas y buscadas tras el terremoto en Venezuela. Comparte información con total responsabilidad." />
+  <meta property="og:title" content="SOS Venezuela - Registro de Personas tras el Sismo" />
+  <meta property="og:description" content="Ayuda a reunir familias. Registra o busca personas afectadas por el terremoto en Venezuela." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- Google Sheets API -->
+  <script src="https://apis.google.com/js/api.js" defer></script>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-inner container">
+      <div class="header-brand">
+        <div class="sos-badge">🆘 SOS</div>
+        <div class="header-titles">
+          <h1 class="site-title">Venezuela Terremoto 2026</h1>
+          <p class="site-subtitle">Registro de Personas Encontradas &amp; Buscadas</p>
+        </div>
+      </div>
+      <div class="header-meta">
+        <span class="date-badge">📅 25 Jun 2026</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- AVISO DE RESPONSABILIDAD -->
+  <div class="alert-banner" id="alertBanner">
+    <div class="container">
+      <div class="alert-content">
+        <span class="alert-icon">⚠️</span>
+        <p>
+          <strong>IMPORTANTE:</strong> Ingresa solo información veraz y verificada.
+          Publicar datos falsos dificulta las labores de rescate y puede afectar a familias desesperadas.
+          Al registrar datos confirmas que la información es real según tu conocimiento.
+        </p>
+        <button class="alert-close" onclick="document.getElementById('alertBanner').style.display='none'" aria-label="Cerrar aviso">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BARRA DE ESTADÍSTICAS -->
+  <section class="stats-bar">
+    <div class="container stats-grid">
+      <div class="stat-card">
+        <span class="stat-number" id="statTotal">—</span>
+        <span class="stat-label">Personas registradas</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" id="statFound">—</span>
+        <span class="stat-label">Encontradas / A salvo</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" id="statMissing">—</span>
+        <span class="stat-label">Buscadas / Desaparecidas</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" id="statChildren">—</span>
+        <span class="stat-label">Niños registrados</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- NAVEGACIÓN PRINCIPAL -->
+  <nav class="main-nav" role="navigation" aria-label="Secciones principales">
+    <div class="container">
+      <div class="nav-tabs" role="tablist">
+        <button class="nav-tab active" role="tab" aria-selected="true" aria-controls="panel-registrar" id="tab-registrar" onclick="switchTab('registrar')">
+          <span class="tab-icon">📝</span> Registrar Persona
+        </button>
+        <button class="nav-tab" role="tab" aria-selected="false" aria-controls="panel-buscar" id="tab-buscar" onclick="switchTab('buscar')">
+          <span class="tab-icon">🔍</span> Buscar Persona
+        </button>
+        <button class="nav-tab" role="tab" aria-selected="false" aria-controls="panel-estados" id="tab-estados" onclick="switchTab('estados')">
+          <span class="tab-icon">🗺️</span> Por Estado
+        </button>
+        <button class="nav-tab" role="tab" aria-selected="false" aria-controls="panel-anuncios" id="tab-anuncios" onclick="switchTab('anuncios')">
+          <span class="tab-icon">📢</span> Anuncios de Búsqueda
+        </button>
+        <button class="nav-tab" role="tab" aria-selected="false" aria-controls="panel-config" id="tab-config" onclick="switchTab('config')">
+          <span class="tab-icon">⚙️</span> Configurar
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="main-content container">
+
+    <!-- PANEL: REGISTRAR PERSONA -->
+    <section id="panel-registrar" class="tab-panel active" role="tabpanel" aria-labelledby="tab-registrar">
+      <div class="panel-header">
+        <h2>📝 Registrar Persona</h2>
+        <p class="panel-desc">Registra aquí a personas que hayas encontrado, rescatado o que estén a salvo. También puedes registrar personas buscadas si conoces su paradero.</p>
+      </div>
+
+      <div class="responsibility-notice">
+        <div class="notice-icon">📋</div>
+        <div class="notice-text">
+          <strong>Compromiso de Responsabilidad:</strong> Al enviar este formulario confirmas que la información
+          es verídica y fue obtenida de primera mano o de una fuente confiable. Datos falsos obstruyen el rescate.
+        </div>
+      </div>
+
+      <form id="registroForm" class="registro-form" novalidate>
+        <div class="form-section">
+          <h3 class="form-section-title">👤 Datos de la Persona</h3>
+          <div class="form-grid">
+            <div class="form-group required">
+              <label for="nombreCompleto">Nombre completo</label>
+              <input type="text" id="nombreCompleto" name="nombreCompleto" placeholder="Ej: María García López" required autocomplete="name" />
+              <span class="field-hint">Nombre y apellidos como aparecen en el documento</span>
+            </div>
+            <div class="form-group">
+              <label for="edad">Edad aproximada</label>
+              <input type="number" id="edad" name="edad" min="0" max="120" placeholder="Ej: 35" />
+            </div>
+            <div class="form-group required">
+              <label for="tipoPersn">Tipo de persona</label>
+              <select id="tipoPersn" name="tipoPersn" required>
+                <option value="">Seleccionar…</option>
+                <option value="adulto">Adulto (18+ años)</option>
+                <option value="nino">Niño / Adolescente (menor de 18)</option>
+                <option value="adulto_mayor">Adulto mayor (60+ años)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="genero">Género</label>
+              <select id="genero" name="genero">
+                <option value="">No especificar</option>
+                <option value="femenino">Femenino</option>
+                <option value="masculino">Masculino</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="cedula">Cédula / Documento</label>
+              <input type="text" id="cedula" name="cedula" placeholder="Ej: V-12345678" />
+              <span class="field-hint">Si está disponible, ayuda a identificar con certeza</span>
+            </div>
+            <div class="form-group">
+              <label for="telefono">Teléfono de contacto</label>
+              <input type="tel" id="telefono" name="telefono" placeholder="Ej: 0412-1234567" />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3 class="form-section-title">📍 Ubicación</h3>
+          <div class="form-grid">
+            <div class="form-group required">
+              <label for="estadoUbic">Estado</label>
+              <select id="estadoUbic" name="estadoUbic" required>
+                <option value="">Seleccionar estado…</option>
+              </select>
+            </div>
+            <div class="form-group required">
+              <label for="municipio">Municipio / Ciudad</label>
+              <input type="text" id="municipio" name="municipio" placeholder="Ej: Caracas, Petare" required />
+            </div>
+            <div class="form-group full-width">
+              <label for="direccion">Dirección o referencia de ubicación</label>
+              <input type="text" id="direccion" name="direccion" placeholder="Ej: Refugio Escuela Bolivariana, Calle X con Calle Y" />
+              <span class="field-hint">Sé específico para facilitar el contacto</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3 class="form-section-title">🏥 Estado de Salud</h3>
+          <div class="form-grid">
+            <div class="form-group required">
+              <label for="estadoSalud">Condición actual</label>
+              <select id="estadoSalud" name="estadoSalud" required>
+                <option value="">Seleccionar…</option>
+                <option value="sano">✅ Sano / Sin lesiones</option>
+                <option value="leve">🟡 Heridas leves</option>
+                <option value="grave">🔴 Heridas graves</option>
+                <option value="critico">⛔ Estado crítico</option>
+                <option value="fallecido">⚫ Fallecido</option>
+                <option value="desconocido">❓ Desconocido</option>
+              </select>
+            </div>
+            <div class="form-group required">
+              <label for="tipoRegistro">Tipo de registro</label>
+              <select id="tipoRegistro" name="tipoRegistro" required>
+                <option value="">Seleccionar…</option>
+                <option value="encontrado">✅ Encontrado / A salvo</option>
+                <option value="buscado">🔍 Buscado / Paradero desconocido</option>
+                <option value="en_refugio">🏠 En refugio / Albergue</option>
+                <option value="hospitalizado">🏥 Hospitalizado</option>
+              </select>
+            </div>
+            <div class="form-group full-width">
+              <label for="descripcionSalud">Descripción adicional de salud o situación</label>
+              <textarea id="descripcionSalud" name="descripcionSalud" rows="3" placeholder="Describe lesiones, condición médica especial, necesidades urgentes, etc."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3 class="form-section-title">📞 Datos de quien Reporta</h3>
+          <div class="form-grid">
+            <div class="form-group required">
+              <label for="reporterNombre">Tu nombre</label>
+              <input type="text" id="reporterNombre" name="reporterNombre" placeholder="Tu nombre completo" required />
+            </div>
+            <div class="form-group required">
+              <label for="reporterTelefono">Tu teléfono / contacto</label>
+              <input type="tel" id="reporterTelefono" name="reporterTelefono" placeholder="0412-1234567 o @usuario" required />
+            </div>
+            <div class="form-group full-width">
+              <label for="notasAdicionales">Notas adicionales</label>
+              <textarea id="notasAdicionales" name="notasAdicionales" rows="2" placeholder="Cualquier información adicional relevante…"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <div class="consent-check">
+            <input type="checkbox" id="consentimiento" name="consentimiento" required />
+            <label for="consentimiento">
+              Confirmo que la información ingresada es <strong>verídica y verificada</strong>.
+              Entiendo que los datos falsos pueden perjudicar labores de rescate.
+            </label>
+          </div>
+          <button type="submit" class="btn-primary btn-submit" id="btnRegistrar">
+            <span class="btn-icon">✅</span> Registrar Persona
+          </button>
+        </div>
+      </form>
+
+      <div id="formMsg" class="form-message hidden" role="alert" aria-live="polite"></div>
+    </section>
+
+    <!-- PANEL: BUSCAR -->
+    <section id="panel-buscar" class="tab-panel" role="tabpanel" aria-labelledby="tab-buscar">
+      <div class="panel-header">
+        <h2>🔍 Buscar Persona</h2>
+        <p class="panel-desc">Busca en todos los registros por nombre, cédula, estado o municipio.</p>
+      </div>
+
+      <div class="search-bar-container">
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input type="search" id="searchInput" placeholder="Buscar por nombre, cédula, estado, municipio…" aria-label="Buscar persona" />
+          <button class="btn-search" onclick="performSearch()" id="btnBuscar">Buscar</button>
+        </div>
+        <div class="search-filters">
+          <select id="filterEstado" aria-label="Filtrar por estado">
+            <option value="">Todos los estados</option>
+          </select>
+          <select id="filterTipoRegistro" aria-label="Filtrar por tipo">
+            <option value="">Todos los tipos</option>
+            <option value="encontrado">Encontrado</option>
+            <option value="buscado">Buscado</option>
+            <option value="en_refugio">En refugio</option>
+            <option value="hospitalizado">Hospitalizado</option>
+          </select>
+          <select id="filterSalud" aria-label="Filtrar por salud">
+            <option value="">Todos los estados de salud</option>
+            <option value="sano">Sano</option>
+            <option value="leve">Heridas leves</option>
+            <option value="grave">Heridas graves</option>
+            <option value="critico">Crítico</option>
+            <option value="fallecido">Fallecido</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="searchResults" class="results-container">
+        <div class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <p>Ingresa un término de búsqueda para encontrar registros.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL: POR ESTADO -->
+    <section id="panel-estados" class="tab-panel" role="tabpanel" aria-labelledby="tab-estados">
+      <div class="panel-header">
+        <h2>🗺️ Registros por Estado</h2>
+        <p class="panel-desc">Consulta el listado de personas registradas por cada estado de Venezuela.</p>
+      </div>
+
+      <div class="estados-selector">
+        <div class="estados-grid" id="estadosGrid">
+          <!-- Generado por JS -->
+        </div>
+      </div>
+
+      <div id="estadoDetalles" class="estado-detalles hidden">
+        <div class="estado-header">
+          <button class="btn-back" onclick="clearEstadoView()">← Volver</button>
+          <h3 id="estadoNombre"></h3>
+          <span class="estado-count" id="estadoCount"></span>
+        </div>
+        <div id="estadoRecords" class="results-container"></div>
+      </div>
+    </section>
+
+    <!-- PANEL: ANUNCIOS -->
+    <section id="panel-anuncios" class="tab-panel" role="tabpanel" aria-labelledby="tab-anuncios">
+      <div class="panel-header">
+        <h2>📢 Anuncios de Búsqueda</h2>
+        <p class="panel-desc">Publica aquí si buscas a alguien y necesitas que el público te ayude a encontrarlo.</p>
+      </div>
+
+      <div class="responsibility-notice">
+        <div class="notice-icon">⚠️</div>
+        <div class="notice-text">
+          <strong>Aviso:</strong> Solo publica información verdadera. Incluye una foto si es posible.
+          Los anuncios son públicos y pueden ser vistos por cualquier persona.
+          No publiques datos sensibles como contraseñas, números de cuenta bancaria, etc.
+        </div>
+      </div>
+
+      <div class="anuncios-layout">
+        <div class="anuncio-form-container">
+          <h3>Publicar anuncio de búsqueda</h3>
+          <form id="anuncioForm" class="registro-form" novalidate>
+            <div class="form-group required">
+              <label for="anuncioNombre">Nombre de la persona buscada</label>
+              <input type="text" id="anuncioNombre" name="anuncioNombre" placeholder="Nombre completo" required />
+            </div>
+            <div class="form-group">
+              <label for="anuncioEdad">Edad aproximada</label>
+              <input type="number" id="anuncioEdad" name="anuncioEdad" min="0" max="120" placeholder="Ej: 12" />
+            </div>
+            <div class="form-group">
+              <label for="anuncioEstado">Último estado conocido</label>
+              <select id="anuncioEstado" name="anuncioEstado">
+                <option value="">Seleccionar…</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="anuncioUbicacion">Última ubicación conocida</label>
+              <input type="text" id="anuncioUbicacion" name="anuncioUbicacion" placeholder="Municipio, sector, dirección" />
+            </div>
+            <div class="form-group required">
+              <label for="anuncioDescripcion">Descripción / Señas particulares</label>
+              <textarea id="anuncioDescripcion" name="anuncioDescripcion" rows="4" placeholder="Describe a la persona: ropa que llevaba, señas físicas particulares, discapacidades, etc." required></textarea>
+            </div>
+            <div class="form-group required">
+              <label for="anuncioContacto">Tu contacto (teléfono / red social)</label>
+              <input type="text" id="anuncioContacto" name="anuncioContacto" placeholder="0412-1234567 o @usuario en Twitter/Instagram" required />
+            </div>
+            <div class="form-group">
+              <label for="anuncioNombreReporter">Tu nombre</label>
+              <input type="text" id="anuncioNombreReporter" name="anuncioNombreReporter" placeholder="Tu nombre completo" />
+            </div>
+            <div class="form-footer">
+              <div class="consent-check">
+                <input type="checkbox" id="anuncioConsentimiento" required />
+                <label for="anuncioConsentimiento">Confirmo que esta información es real y asumo responsabilidad.</label>
+              </div>
+              <button type="submit" class="btn-primary" id="btnAnuncio">
+                <span class="btn-icon">📢</span> Publicar Anuncio
+              </button>
+            </div>
+          </form>
+          <div id="anuncioMsg" class="form-message hidden" role="alert" aria-live="polite"></div>
+        </div>
+
+        <div class="anuncios-list-container">
+          <h3>Anuncios publicados <span id="anunciosCount" class="count-badge">—</span></h3>
+          <div class="search-bar mini">
+            <input type="search" id="anuncioSearch" placeholder="Buscar en anuncios…" oninput="filterAnuncios(this.value)" />
+          </div>
+          <div id="anunciosList" class="anuncios-list">
+            <div class="loading-state">
+              <div class="spinner"></div>
+              <p>Cargando anuncios…</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL: CONFIGURACIÓN -->
+    <section id="panel-config" class="tab-panel" role="tabpanel" aria-labelledby="tab-config">
+      <div class="panel-header">
+        <h2>⚙️ Configuración de Google Sheets</h2>
+        <p class="panel-desc">Conecta esta aplicación con una hoja de cálculo de Google Sheets para guardar y leer los datos.</p>
+      </div>
+
+      <div class="config-card">
+        <h3>🔗 Instrucciones de configuración</h3>
+        <ol class="config-steps">
+          <li>
+            <strong>Crea una hoja de cálculo en Google Drive</strong> y compártela públicamente (cualquier persona con el enlace puede ver y editar).
+          </li>
+          <li>
+            <strong>Copia el ID de la hoja:</strong> es la parte de la URL entre <code>/d/</code> y <code>/edit</code>.
+            <br>Ejemplo: <code>https://docs.google.com/spreadsheets/d/<strong>1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms</strong>/edit</code>
+          </li>
+          <li>
+            <strong>Obtén una API Key de Google:</strong> ve a <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">Google Cloud Console</a>,
+            crea un proyecto, activa la API de Google Sheets, y crea una clave de API.
+          </li>
+          <li>
+            <strong>Crea un Apps Script</strong> (Extensiones → Apps Script en tu hoja de cálculo) y configura el Web App como se indica en el README.
+          </li>
+          <li>Pega tus datos abajo y haz clic en "Guardar configuración".</li>
+        </ol>
+
+        <div class="config-form">
+          <div class="form-group">
+            <label for="cfgSheetId">ID de la Hoja de Cálculo (Spreadsheet ID)</label>
+            <input type="text" id="cfgSheetId" placeholder="Pega aquí el ID de tu hoja de cálculo" />
+          </div>
+          <div class="form-group">
+            <label for="cfgApiKey">Google Sheets API Key</label>
+            <input type="text" id="cfgApiKey" placeholder="Tu API Key de Google Cloud" />
+            <span class="field-hint">Se guarda solo en tu navegador (localStorage), no se sube a ningún servidor.</span>
+          </div>
+          <div class="form-group">
+            <label for="cfgWebAppUrl">URL del Google Apps Script Web App</label>
+            <input type="text" id="cfgWebAppUrl" placeholder="https://script.google.com/macros/s/…/exec" />
+            <span class="field-hint">Necesaria para escribir datos (agregar registros).</span>
+          </div>
+          <div class="form-group">
+            <label for="cfgSheetRegistros">Nombre de la hoja de Registros</label>
+            <input type="text" id="cfgSheetRegistros" placeholder="Registros" value="Registros" />
+          </div>
+          <div class="form-group">
+            <label for="cfgSheetAnuncios">Nombre de la hoja de Anuncios</label>
+            <input type="text" id="cfgSheetAnuncios" placeholder="Anuncios" value="Anuncios" />
+          </div>
+          <div class="config-actions">
+            <button class="btn-primary" onclick="saveConfig()" id="btnGuardarConfig">💾 Guardar configuración</button>
+            <button class="btn-secondary" onclick="testConnection()" id="btnTestConexion">🔌 Probar conexión</button>
+          </div>
+          <div id="configMsg" class="form-message hidden" role="alert" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <div class="config-card config-apps-script">
+        <h3>📜 Código para Google Apps Script</h3>
+        <p>Copia y pega este código en tu Google Apps Script y despliégalo como Web App:</p>
+        <div class="code-block-wrapper">
+          <button class="btn-copy" onclick="copyAppsScript()" id="btnCopyScript">📋 Copiar código</button>
+          <pre class="code-block" id="appsScriptCode">
+// Google Apps Script para SOS Venezuela
+// Pega este código en Extensiones > Apps Script en tu hoja de cálculo
+// Luego despliega como Web App: Implementar > Nueva implementación
+// Acceso: Cualquier persona, incluso anónimos
+
+const SHEET_REGISTROS = 'Registros';
+const SHEET_ANUNCIOS = 'Anuncios';
+
+function doPost(e) {
+  const data = JSON.parse(e.postData.contents);
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  if (data.tipo === 'registro') {
+    const sheet = ss.getSheetByName(SHEET_REGISTROS) || ss.insertSheet(SHEET_REGISTROS);
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(['Timestamp','Nombre','Edad','TipoPersn','Genero','Cedula','Telefono',
+        'Estado','Municipio','Direccion','EstadoSalud','TipoRegistro','DescSalud',
+        'ReporterNombre','ReporterContacto','Notas','ID']);
+    }
+    const id = 'R' + Date.now();
+    sheet.appendRow([
+      new Date().toISOString(), data.nombreCompleto, data.edad, data.tipoPersn,
+      data.genero, data.cedula, data.telefono, data.estadoUbic, data.municipio,
+      data.direccion, data.estadoSalud, data.tipoRegistro, data.descripcionSalud,
+      data.reporterNombre, data.reporterTelefono, data.notasAdicionales, id
+    ]);
+    return ContentService.createTextOutput(JSON.stringify({ok: true, id}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  if (data.tipo === 'anuncio') {
+    const sheet = ss.getSheetByName(SHEET_ANUNCIOS) || ss.insertSheet(SHEET_ANUNCIOS);
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(['Timestamp','NombreBuscado','Edad','Estado','Ubicacion',
+        'Descripcion','Contacto','NombreReporter','ID']);
+    }
+    const id = 'A' + Date.now();
+    sheet.appendRow([
+      new Date().toISOString(), data.anuncioNombre, data.anuncioEdad,
+      data.anuncioEstado, data.anuncioUbicacion, data.anuncioDescripcion,
+      data.anuncioContacto, data.anuncioNombreReporter, id
+    ]);
+    return ContentService.createTextOutput(JSON.stringify({ok: true, id}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify({ok: false, error: 'Tipo desconocido'}))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doGet(e) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const tipo = e.parameter.tipo || 'registros';
+  
+  const sheetName = tipo === 'anuncios' ? SHEET_ANUNCIOS : SHEET_REGISTROS;
+  const sheet = ss.getSheetByName(sheetName);
+  
+  if (!sheet || sheet.getLastRow() <= 1) {
+    return ContentService.createTextOutput(JSON.stringify({ok: true, data: []}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  const rows = sheet.getDataRange().getValues();
+  const headers = rows[0];
+  const data = rows.slice(1).map(row => {
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = row[i]; });
+    return obj;
+  });
+  
+  return ContentService.createTextOutput(JSON.stringify({ok: true, data}))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+          </pre>
+        </div>
+      </div>
+
+      <div class="config-card">
+        <h3>⚠️ Modo de demostración</h3>
+        <p>Sin configuración guardada, la aplicación funcionará en <strong>modo demostración</strong> con datos de ejemplo locales. Los registros no se guardarán de forma permanente.</p>
+        <button class="btn-secondary" onclick="loadMockData()" id="btnMockData">🗂️ Cargar datos de ejemplo</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-left">
+        <p><strong>SOS Venezuela Terremoto 2026</strong></p>
+        <p>Plataforma de emergencia civil. No es un sitio oficial del gobierno.</p>
+        <p>Los datos son responsabilidad de quien los publica.</p>
+      </div>
+      <div class="footer-right">
+        <p>🆘 Emergencias: 911 | 0800-PROTECCION</p>
+        <p>🏥 Cruz Roja Venezuela: <a href="tel:+582125619988">+58 212 561-9988</a></p>
+        <p>💬 Comparte esta página para ayudar a más familias</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>Open source — Datos alojados en Google Sheets. <span id="lastUpdate"></span></p>
+    </div>
+  </footer>
+
+  <!-- MODAL DE REGISTRO EXITOSO -->
+  <div id="modalExito" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-overlay" onclick="closeModal()"></div>
+    <div class="modal-box">
+      <div class="modal-icon success">✅</div>
+      <h3 id="modalTitle">¡Registro exitoso!</h3>
+      <p id="modalMsg">La persona ha sido registrada correctamente.</p>
+      <div class="modal-id" id="modalId"></div>
+      <button class="btn-primary" onclick="closeModal()" id="btnCerrarModal">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATIONS -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
