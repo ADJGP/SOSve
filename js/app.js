@@ -6,17 +6,20 @@
 'use strict';
 
 /* ==============================
-   ESTADO GLOBAL
+   ESTADO GLOBAL Y CONFIGURACIÓN
    ============================== */
 let registros = [];
 let anuncios  = [];
-let config    = {
-  sheetId:        '',
-  apiKey:         '',
-  webAppUrl:      '',
+
+// ⚠️ IMPORTANTE: Coloca aquí tus datos para que funcione para todos los usuarios
+let config = {
+  sheetId:        '15o78St2GHdamibADpirj2XMRXngF0bcKZdNG5m2z96U', // Ej: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms'
+  apiKey:         'AIzaSyC2AIGUswWNIwoerA8fqfE3kQJY2cl5xsQ', // Tu API Key de Google
+  webAppUrl:      'https://script.google.com/macros/s/AKfycbx8vyiZkddQy1xXip_dWtCcx1F9R4EAo38Aywj56DRrPQpaH4uK_qMxEVEIfzJ0f7AI/exec', // Ej: 'https://script.google.com/macros/s/.../exec'
   sheetRegistros: 'Registros',
   sheetAnuncios:  'Anuncios'
 };
+
 let isMockMode = false;
 
 /* ==============================
@@ -34,36 +37,26 @@ document.addEventListener('DOMContentLoaded', () => {
    CONFIGURACIÓN
    ============================== */
 function loadConfig() {
-  try {
-    const stored = localStorage.getItem('sos_venezuela_config');
-    if (stored) {
-      config = { ...config, ...JSON.parse(stored) };
-    }
-  } catch (e) { /* sin config */ }
-
-  // Pre-llenar campos de config
+  // Pre-llenar campos de config en la UI con los datos del código
   setVal('cfgSheetId',        config.sheetId);
   setVal('cfgApiKey',         config.apiKey);
   setVal('cfgWebAppUrl',      config.webAppUrl);
-  setVal('cfgSheetRegistros', config.sheetRegistros || 'Registros');
-  setVal('cfgSheetAnuncios',  config.sheetAnuncios  || 'Anuncios');
+  setVal('cfgSheetRegistros', config.sheetRegistros);
+  setVal('cfgSheetAnuncios',  config.sheetAnuncios);
 }
 
 function saveConfig() {
+  // Esta función ahora solo actualiza la sesión actual para pruebas.
+  // Para que sea permanente, debes editar las variables 'config' al inicio de js/app.js
   config.sheetId        = getVal('cfgSheetId').trim();
   config.apiKey         = getVal('cfgApiKey').trim();
   config.webAppUrl      = getVal('cfgWebAppUrl').trim();
   config.sheetRegistros = getVal('cfgSheetRegistros').trim() || 'Registros';
   config.sheetAnuncios  = getVal('cfgSheetAnuncios').trim()  || 'Anuncios';
 
-  try {
-    localStorage.setItem('sos_venezuela_config', JSON.stringify(config));
-    showMsg('configMsg', 'success', '✅ Configuración guardada en tu navegador.');
-    toast('Configuración guardada', 'success');
-    isMockMode = false;
-  } catch (e) {
-    showMsg('configMsg', 'error', '❌ No se pudo guardar: ' + e.message);
-  }
+  showMsg('configMsg', 'success', '✅ Configuración aplicada temporalmente. Para guardarla, pégala en js/app.js.');
+  toast('Configuración aplicada', 'success');
+  isMockMode = false;
 }
 
 async function testConnection() {
