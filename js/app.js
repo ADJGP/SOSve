@@ -31,6 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
   setupForms();
   loadData();
   updateFooterDate();
+
+  // Actualización automática en segundo plano cada 20 segundos
+  setInterval(() => {
+    if (!isMockMode) loadDataBackground();
+  }, 20000);
 });
 
 /* ==============================
@@ -157,6 +162,45 @@ async function loadData() {
     loadMockData();
   } finally {
     setBtnState('btnRegistrar', false, '✅ Registrar Persona');
+  }
+}
+
+async function loadDataBackground() {
+  if (!config.sheetId || !config.apiKey) return;
+  try {
+    const [resReg, resAnun] = await Promise.all([
+      fetchSheetData('registros'),
+      fetchSheetData('anuncios')
+    ]);
+    
+    // Actualizar estado global
+    registros = resReg;
+    anuncios  = resAnun;
+    
+    // Actualizar estadísticas sin interrumpir
+    updateStats();
+    updateFooterDate();
+    
+    // Re-renderizar la vista actual de forma imperceptible (sin borrar lo que escribe el usuario)
+    const activePanel = document.querySelector('.tab-panel.active');
+    if (!activePanel) return;
+    
+    const panelId = activePanel.id;
+    if (panelId === 'panel-buscar') {
+      performSearch(); 
+    } else if (panelId === 'panel-estados') {
+      if (!document.getElementById('estadoDetalles').classList.contains('hidden')) {
+        const estadoViendo = document.getElementById('estadoNombre').textContent.replace('📍 ', '');
+        showEstado(estadoViendo);
+      } else {
+        renderEstadosGrid();
+      }
+    } else if (panelId === 'panel-anuncios') {
+      const filter = getVal('anuncioSearch');
+      renderAnuncios(filter);
+    }
+  } catch (e) {
+    console.warn('Actualización en segundo plano falló silenciosamente:', e);
   }
 }
 
