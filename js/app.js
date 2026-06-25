@@ -9,16 +9,16 @@
    ESTADO GLOBAL Y CONFIGURACIÓN
    ============================== */
 let registros = [];
-let anuncios  = [];
+let anuncios = [];
 let comentarios = [];
 
 // ⚠️ IMPORTANTE: Coloca aquí tus datos para que funcione para todos los usuarios
 let config = {
-  sheetId:        '15o78St2GHdamibADpirj2XMRXngF0bcKZdNG5m2z96U', // Ej: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms'
-  apiKey:         'AIzaSyC2AIGUswWNIwoerA8fqfE3kQJY2cl5xsQ', // Tu API Key de Google
-  webAppUrl:      'https://script.google.com/macros/s/AKfycbx8vyiZkddQy1xXip_dWtCcx1F9R4EAo38Aywj56DRrPQpaH4uK_qMxEVEIfzJ0f7AI/exec', // Ej: 'https://script.google.com/macros/s/.../exec'
+  sheetId: '15o78St2GHdamibADpirj2XMRXngF0bcKZdNG5m2z96U', // Ej: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms'
+  apiKey: 'AIzaSyC2AIGUswWNIwoerA8fqfE3kQJY2cl5xsQ', // Tu API Key de Google
+  webAppUrl: 'https://script.google.com/macros/s/AKfycbwEoCg2AaeJTMcxXBzq2EHlHMZw8JHdd8bfTjAmN5XNC7nWyX4wyZ7RFoFPCoGpNa45/exec', // Ej: 'https://script.google.com/macros/s/.../exec'
   sheetRegistros: 'Registros',
-  sheetAnuncios:  'Anuncios'
+  sheetAnuncios: 'Anuncios'
 };
 
 let isMockMode = false;
@@ -44,21 +44,21 @@ document.addEventListener('DOMContentLoaded', () => {
    ============================== */
 function loadConfig() {
   // Pre-llenar campos de config en la UI con los datos del código
-  setVal('cfgSheetId',        config.sheetId);
-  setVal('cfgApiKey',         config.apiKey);
-  setVal('cfgWebAppUrl',      config.webAppUrl);
+  setVal('cfgSheetId', config.sheetId);
+  setVal('cfgApiKey', config.apiKey);
+  setVal('cfgWebAppUrl', config.webAppUrl);
   setVal('cfgSheetRegistros', config.sheetRegistros);
-  setVal('cfgSheetAnuncios',  config.sheetAnuncios);
+  setVal('cfgSheetAnuncios', config.sheetAnuncios);
 }
 
 function saveConfig() {
   // Esta función ahora solo actualiza la sesión actual para pruebas.
   // Para que sea permanente, debes editar las variables 'config' al inicio de js/app.js
-  config.sheetId        = getVal('cfgSheetId').trim();
-  config.apiKey         = getVal('cfgApiKey').trim();
-  config.webAppUrl      = getVal('cfgWebAppUrl').trim();
+  config.sheetId = getVal('cfgSheetId').trim();
+  config.apiKey = getVal('cfgApiKey').trim();
+  config.webAppUrl = getVal('cfgWebAppUrl').trim();
   config.sheetRegistros = getVal('cfgSheetRegistros').trim() || 'Registros';
-  config.sheetAnuncios  = getVal('cfgSheetAnuncios').trim()  || 'Anuncios';
+  config.sheetAnuncios = getVal('cfgSheetAnuncios').trim() || 'Anuncios';
 
   showMsg('configMsg', 'success', '✅ Configuración aplicada temporalmente. Para guardarla, pégala en js/app.js.');
   toast('Configuración aplicada', 'success');
@@ -73,14 +73,14 @@ async function testConnection() {
   document.getElementById('configMsg').classList.add('hidden');
 
   // Leer valores frescos del formulario (pueden no haberse guardado aún)
-  const sid  = getVal('cfgSheetId').trim();
+  const sid = getVal('cfgSheetId').trim();
   const akey = getVal('cfgApiKey').trim();
   const wurl = getVal('cfgWebAppUrl').trim();
 
   try {
     // --- Estrategia 1: probar el Web App (si está configurado) ---
     if (wurl) {
-      const res  = await fetch(`${wurl}?tipo=registros`);
+      const res = await fetch(`${wurl}?tipo=registros`);
       if (!res.ok) throw new Error(`Apps Script devolvió HTTP ${res.status}. Verifica que el Web App esté publicado como acceso "Cualquier persona"`);
       const json = await res.json();
       if (json.ok !== undefined) {
@@ -97,13 +97,13 @@ async function testConnection() {
     }
     const sheetName = getVal('cfgSheetRegistros').trim() || 'Registros';
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/${encodeURIComponent(sheetName)}?key=${akey}`;
-    const res  = await fetch(url);
+    const res = await fetch(url);
     const json = await res.json();
 
     if (json.error) {
       // Google devuelve {error: {code, message, status}}
       const code = json.error.code || '';
-      const msg  = json.error.message || 'Error desconocido';
+      const msg = json.error.message || 'Error desconocido';
       if (code === 403) throw new Error(`403 – Acceso denegado. Asegúrate de que la hoja esté compartida públicamente ("Cualquier persona con el enlace puede ver") y que la API Key tenga permiso para Sheets API.`);
       if (code === 400) throw new Error(`400 – ID de hoja inválido. Revisa que copiaste el ID correcto (la parte entre /d/ y /edit en la URL).`);
       if (code === 404) throw new Error(`404 – Hoja "${sheetName}" no encontrada. Verifica que la pestaña de la hoja se llame exactamente "Registros" (con mayúscula).`);
@@ -127,7 +127,7 @@ async function testConnection() {
 function loadMockData() {
   isMockMode = true;
   registros = [...MOCK_REGISTROS];
-  anuncios  = [...MOCK_ANUNCIOS];
+  anuncios = [...MOCK_ANUNCIOS];
   updateStats();
   renderAnuncios();
   renderEstadosGrid();
@@ -152,7 +152,7 @@ async function loadData() {
       fetchSheetData('comentarios')
     ]);
     registros = resReg;
-    anuncios  = resAnun;
+    anuncios = resAnun;
     comentarios = resCom;
     updateStats();
     renderAnuncios();
@@ -176,23 +176,23 @@ async function loadDataBackground() {
       fetchSheetData('anuncios'),
       fetchSheetData('comentarios')
     ]);
-    
+
     // Actualizar estado global
     registros = resReg;
-    anuncios  = resAnun;
+    anuncios = resAnun;
     comentarios = resCom;
-    
+
     // Actualizar estadísticas sin interrumpir
     updateStats();
     updateFooterDate();
-    
+
     // Re-renderizar la vista actual de forma imperceptible (sin borrar lo que escribe el usuario)
     const activePanel = document.querySelector('.tab-panel.active');
     if (!activePanel) return;
-    
+
     const panelId = activePanel.id;
     if (panelId === 'panel-buscar') {
-      performSearch(); 
+      performSearch();
     } else if (panelId === 'panel-estados') {
       if (!document.getElementById('estadoDetalles').classList.contains('hidden')) {
         const estadoViendo = document.getElementById('estadoNombre').textContent.replace('📍 ', '');
@@ -221,13 +221,13 @@ async function fetchSheetData(tipo) {
   }
 
   /* Lectura pública vía Sheets API v4 */
-  const url  = buildReadUrl(tipo);
-  const res  = await fetch(url);
+  const url = buildReadUrl(tipo);
+  const res = await fetch(url);
   const json = await res.json();
 
   if (json.error) {
     const code = json.error.code || '';
-    const msg  = json.error.message || 'Error de API';
+    const msg = json.error.message || 'Error de API';
     if (code === 400 && tipo === 'comentarios') return []; // Hoja de comentarios no creada aún
     throw new Error(`Sheets API ${code}: ${msg}`);
   }
@@ -374,11 +374,11 @@ async function handleAnuncioSubmit(e) {
 function validateRegistro(data) {
   const errs = [];
   if (!data.nombreCompleto) errs.push({ field: 'nombreCompleto', msg: 'El nombre es obligatorio.' });
-  if (!data.tipoPersn)      errs.push({ field: 'tipoPersn',      msg: 'Selecciona el tipo de persona.' });
-  if (!data.estadoUbic)     errs.push({ field: 'estadoUbic',     msg: 'Selecciona el estado.' });
-  if (!data.municipio)      errs.push({ field: 'municipio',      msg: 'El municipio es obligatorio.' });
-  if (!data.estadoSalud)    errs.push({ field: 'estadoSalud',    msg: 'Selecciona el estado de salud.' });
-  if (!data.tipoRegistro)   errs.push({ field: 'tipoRegistro',   msg: 'Selecciona el tipo de registro.' });
+  if (!data.tipoPersn) errs.push({ field: 'tipoPersn', msg: 'Selecciona el tipo de persona.' });
+  if (!data.estadoUbic) errs.push({ field: 'estadoUbic', msg: 'Selecciona el estado.' });
+  if (!data.municipio) errs.push({ field: 'municipio', msg: 'El municipio es obligatorio.' });
+  if (!data.estadoSalud) errs.push({ field: 'estadoSalud', msg: 'Selecciona el estado de salud.' });
+  if (!data.tipoRegistro) errs.push({ field: 'tipoRegistro', msg: 'Selecciona el tipo de registro.' });
   if (!data.reporterNombre) errs.push({ field: 'reporterNombre', msg: 'Tu nombre es obligatorio.' });
   if (!data.reporterTelefono) errs.push({ field: 'reporterTelefono', msg: 'Tu contacto es obligatorio.' });
   if (!document.getElementById('consentimiento').checked) {
@@ -448,14 +448,14 @@ function mockInsert(data, tipo) {
    ESTADÍSTICAS
    ============================== */
 function updateStats() {
-  const total    = registros.length;
-  const found    = registros.filter(r => ['encontrado','en_refugio'].includes(r.TipoRegistro)).length;
-  const missing  = registros.filter(r => r.TipoRegistro === 'buscado').length;
+  const total = registros.length;
+  const found = registros.filter(r => ['encontrado', 'en_refugio'].includes(r.TipoRegistro)).length;
+  const missing = registros.filter(r => r.TipoRegistro === 'buscado').length;
   const children = registros.filter(r => r.TipoPersn === 'nino').length;
 
-  animateCount('statTotal',    total);
-  animateCount('statFound',    found);
-  animateCount('statMissing',  missing);
+  animateCount('statTotal', total);
+  animateCount('statFound', found);
+  animateCount('statMissing', missing);
   animateCount('statChildren', children);
 }
 
@@ -463,7 +463,7 @@ function animateCount(id, target) {
   const el = document.getElementById(id);
   if (!el) return;
   const start = parseInt(el.textContent) || 0;
-  const diff  = target - start;
+  const diff = target - start;
   const steps = 20;
   let step = 0;
   const timer = setInterval(() => {
@@ -477,13 +477,13 @@ function animateCount(id, target) {
    RENDER: TARJETAS DE PERSONA
    ============================== */
 function renderRecordCard(r) {
-  const tipo  = TIPO_PERSONA_MAP[r.TipoPersn]  || TIPO_PERSONA_MAP.adulto;
-  const salud = SALUD_MAP[r.EstadoSalud]        || SALUD_MAP.desconocido;
-  const treg  = TIPO_REGISTRO_MAP[r.TipoRegistro] || { label: r.TipoRegistro, css: '' };
-  const ts    = r.Timestamp ? formatDate(r.Timestamp) : '';
+  const tipo = TIPO_PERSONA_MAP[r.TipoPersn] || TIPO_PERSONA_MAP.adulto;
+  const salud = SALUD_MAP[r.EstadoSalud] || SALUD_MAP.desconocido;
+  const treg = TIPO_REGISTRO_MAP[r.TipoRegistro] || { label: r.TipoRegistro, css: '' };
+  const ts = r.Timestamp ? formatDate(r.Timestamp) : '';
 
-  const edad    = r.Edad ? ` · ${r.Edad} años` : '';
-  const cedula  = r.Cedula ? ` · ${r.Cedula}` : '';
+  const edad = r.Edad ? ` · ${r.Edad} años` : '';
+  const cedula = r.Cedula ? ` · ${r.Cedula}` : '';
 
   return `
     <div class="record-card">
@@ -516,9 +516,9 @@ function renderCommentsHTML(parentId) {
   if (!parentId) return '';
   const relComs = comentarios.filter(c => c.ParentID === parentId);
   const addBtn = `<button class="btn-comment" onclick="openCommentModal('${parentId}')">💬 Agregar actualización / comentario</button>`;
-  
+
   if (!relComs.length) return `<div class="comments-section">${addBtn}</div>`;
-  
+
   const tags = relComs.map(c => `
     <div class="comment-item">
       <div class="comment-header">
@@ -528,7 +528,7 @@ function renderCommentsHTML(parentId) {
       <div class="comment-text">${escHtml(c.Comentario)}</div>
     </div>
   `).join('');
-  
+
   return `
     <div class="comments-section">
       <div class="comments-list">${tags}</div>
@@ -602,17 +602,17 @@ function renderEstadosGrid() {
 function showEstado(estado) {
   const estadoRecords = registros.filter(r => r.Estado === estado);
 
-  const grid     = document.getElementById('estadosGrid');
+  const grid = document.getElementById('estadosGrid');
   const detalles = document.getElementById('estadoDetalles');
-  const nombre   = document.getElementById('estadoNombre');
-  const count    = document.getElementById('estadoCount');
-  const records  = document.getElementById('estadoRecords');
+  const nombre = document.getElementById('estadoNombre');
+  const count = document.getElementById('estadoCount');
+  const records = document.getElementById('estadoRecords');
 
   grid.style.display = 'none';
   detalles.classList.remove('hidden');
   detalles.classList.add('visible');
   nombre.textContent = `📍 ${estado}`;
-  count.textContent  = `${estadoRecords.length} ${estadoRecords.length === 1 ? 'persona' : 'personas'}`;
+  count.textContent = `${estadoRecords.length} ${estadoRecords.length === 1 ? 'persona' : 'personas'}`;
 
   if (!estadoRecords.length) {
     records.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>No hay registros para este estado aún.</p></div>`;
@@ -623,7 +623,7 @@ function showEstado(estado) {
 }
 
 function clearEstadoView() {
-  const grid     = document.getElementById('estadosGrid');
+  const grid = document.getElementById('estadosGrid');
   const detalles = document.getElementById('estadoDetalles');
   grid.style.display = '';
   detalles.classList.add('hidden');
@@ -634,11 +634,11 @@ function clearEstadoView() {
    BÚSQUEDA
    ============================== */
 function performSearch() {
-  const query       = normalize(getVal('searchInput'));
-  const estFilter   = getVal('filterEstado');
-  const tipoFilter  = getVal('filterTipoRegistro');
+  const query = normalize(getVal('searchInput'));
+  const estFilter = getVal('filterEstado');
+  const tipoFilter = getVal('filterTipoRegistro');
   const saludFilter = getVal('filterSalud');
-  const container   = document.getElementById('searchResults');
+  const container = document.getElementById('searchResults');
 
   if (!query && !estFilter && !tipoFilter && !saludFilter) {
     container.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>Ingresa un término de búsqueda para encontrar registros.</p></div>`;
@@ -652,8 +652,8 @@ function performSearch() {
       normalize(`${r.Nombre} ${r.Cedula} ${r.Estado} ${r.Municipio} ${r.Direccion} ${r.ReporterNombre}`).includes(query)
     );
   }
-  if (estFilter)   results = results.filter(r => r.Estado === estFilter);
-  if (tipoFilter)  results = results.filter(r => r.TipoRegistro === tipoFilter);
+  if (estFilter) results = results.filter(r => r.Estado === estFilter);
+  if (tipoFilter) results = results.filter(r => r.TipoRegistro === tipoFilter);
   if (saludFilter) results = results.filter(r => r.EstadoSalud === saludFilter);
 
   if (!results.length) {
@@ -679,9 +679,9 @@ function switchTab(name) {
   });
 
   const panel = document.getElementById(`panel-${name}`);
-  const tab   = document.getElementById(`tab-${name}`);
+  const tab = document.getElementById(`tab-${name}`);
   if (panel) panel.classList.add('active');
-  if (tab)   { tab.classList.add('active'); tab.setAttribute('aria-selected', 'true'); }
+  if (tab) { tab.classList.add('active'); tab.setAttribute('aria-selected', 'true'); }
 
   // Si entramos a estados, re-renderizar
   if (name === 'estados') renderEstadosGrid();
@@ -694,8 +694,8 @@ function switchTab(name) {
    ============================== */
 function showModal(title, msg, id) {
   document.getElementById('modalTitle').textContent = title;
-  document.getElementById('modalMsg').textContent   = msg;
-  document.getElementById('modalId').textContent    = id ? `ID de registro: ${id}` : '';
+  document.getElementById('modalMsg').textContent = msg;
+  document.getElementById('modalId').textContent = id ? `ID de registro: ${id}` : '';
   document.getElementById('modalExito').classList.remove('hidden');
 }
 
@@ -718,37 +718,37 @@ function closeCommentModal() {
 
 async function submitComment(e) {
   e.preventDefault();
-  
+
   const parentId = document.getElementById('commentParentId').value;
   const autor = document.getElementById('commentAutor').value.trim();
   const texto = document.getElementById('commentTexto').value.trim();
-  
+
   if (!autor || !texto) {
     toast('Todos los campos son obligatorios', 'error');
     return;
   }
-  
+
   const btn = document.getElementById('btnSubmitComment');
   const orgText = btn.textContent;
   btn.disabled = true;
   btn.textContent = '⏳ Publicando...';
-  
+
   const data = {
     tipo: 'comentario',
     parentId,
     autor,
     texto
   };
-  
+
   try {
     if (isMockMode || !config.webAppUrl) {
       comentarios.push({ ...data, Timestamp: new Date().toISOString(), Comentario: texto, Autor: autor, ParentID: parentId });
     } else {
       await postData(data);
       // Descargamos fresco en background enseguida
-      if (!isMockMode) setTimeout(loadDataBackground, 500); 
+      if (!isMockMode) setTimeout(loadDataBackground, 500);
     }
-    
+
     closeCommentModal();
     toast('Comentario agregado exitosamente', 'success');
   } catch (err) {

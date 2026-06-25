@@ -1,20 +1,25 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SOS Venezuela - Registro de Personas tras el Sismo | Venezuela Earthquake Registry</title>
-  <meta name="description" content="Plataforma de emergencia para el registro de personas encontradas y buscadas tras el terremoto en Venezuela. Comparte información con total responsabilidad." />
+  <meta name="description"
+    content="Plataforma de emergencia para el registro de personas encontradas y buscadas tras el terremoto en Venezuela. Comparte información con total responsabilidad." />
   <meta property="og:title" content="SOS Venezuela - Registro de Personas tras el Sismo" />
-  <meta property="og:description" content="Ayuda a reunir familias. Registra o busca personas afectadas por el terremoto en Venezuela." />
+  <meta property="og:description"
+    content="Ayuda a reunir familias. Registra o busca personas afectadas por el terremoto en Venezuela." />
   <meta property="og:type" content="website" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <!-- Google Sheets API -->
   <script src="https://apis.google.com/js/api.js" defer></script>
 </head>
+
 <body>
 
   <!-- HEADER -->
@@ -43,7 +48,8 @@
           Publicar datos falsos dificulta las labores de rescate y puede afectar a familias desesperadas.
           Al registrar datos confirmas que la información es real según tu conocimiento.
         </p>
-        <button class="alert-close" onclick="document.getElementById('alertBanner').style.display='none'" aria-label="Cerrar aviso">✕</button>
+        <button class="alert-close" onclick="document.getElementById('alertBanner').style.display='none'"
+          aria-label="Cerrar aviso">✕</button>
       </div>
     </div>
   </div>
@@ -74,19 +80,24 @@
   <nav class="main-nav" role="navigation" aria-label="Secciones principales">
     <div class="container">
       <div class="nav-tabs" role="tablist">
-        <button class="nav-tab active" role="tab" aria-selected="true" aria-controls="panel-registrar" id="tab-registrar" onclick="switchTab('registrar')">
+        <button class="nav-tab active" role="tab" aria-selected="true" aria-controls="panel-registrar"
+          id="tab-registrar" onclick="switchTab('registrar')">
           <span class="tab-icon">📝</span> Registrar Persona
         </button>
-        <button class="nav-tab" role="tab" aria-selected="false" aria-controls="panel-buscar" id="tab-buscar" onclick="switchTab('buscar')">
+        <button class="nav-tab" role="tab" aria-selected="false" aria-controls="panel-buscar" id="tab-buscar"
+          onclick="switchTab('buscar')">
           <span class="tab-icon">🔍</span> Buscar Persona
         </button>
-        <button class="nav-tab" role="tab" aria-selected="false" aria-controls="panel-estados" id="tab-estados" onclick="switchTab('estados')">
+        <button class="nav-tab" role="tab" aria-selected="false" aria-controls="panel-estados" id="tab-estados"
+          onclick="switchTab('estados')">
           <span class="tab-icon">🗺️</span> Por Estado
         </button>
-        <button class="nav-tab" role="tab" aria-selected="false" aria-controls="panel-anuncios" id="tab-anuncios" onclick="switchTab('anuncios')">
+        <button class="nav-tab" role="tab" aria-selected="false" aria-controls="panel-anuncios" id="tab-anuncios"
+          onclick="switchTab('anuncios')">
           <span class="tab-icon">📢</span> Anuncios de Búsqueda
         </button>
-        <button class="nav-tab" role="tab" aria-selected="false" aria-controls="panel-config" id="tab-config" onclick="switchTab('config')">
+        <button class="nav-tab" role="tab" aria-selected="false" aria-controls="panel-config" id="tab-config"
+          onclick="switchTab('config')">
           <span class="tab-icon">⚙️</span> Configurar
         </button>
       </div>
@@ -100,7 +111,8 @@
     <section id="panel-registrar" class="tab-panel active" role="tabpanel" aria-labelledby="tab-registrar">
       <div class="panel-header">
         <h2>📝 Registrar Persona</h2>
-        <p class="panel-desc">Registra aquí a personas que hayas encontrado, rescatado o que estén a salvo. También puedes registrar personas buscadas si conoces su paradero.</p>
+        <p class="panel-desc">Registra aquí a personas que hayas encontrado, rescatado o que estén a salvo. También
+          puedes registrar personas buscadas si conoces su paradero.</p>
       </div>
 
       <div class="responsibility-notice">
@@ -117,7 +129,8 @@
           <div class="form-grid">
             <div class="form-group required">
               <label for="nombreCompleto">Nombre completo</label>
-              <input type="text" id="nombreCompleto" name="nombreCompleto" placeholder="Ej: María García López" required autocomplete="name" />
+              <input type="text" id="nombreCompleto" name="nombreCompleto" placeholder="Ej: María García López" required
+                autocomplete="name" />
               <span class="field-hint">Nombre y apellidos como aparecen en el documento</span>
             </div>
             <div class="form-group">
@@ -169,7 +182,8 @@
             </div>
             <div class="form-group full-width">
               <label for="direccion">Dirección o referencia de ubicación</label>
-              <input type="text" id="direccion" name="direccion" placeholder="Ej: Refugio Escuela Bolivariana, Calle X con Calle Y" />
+              <input type="text" id="direccion" name="direccion"
+                placeholder="Ej: Refugio Escuela Bolivariana, Calle X con Calle Y" />
               <span class="field-hint">Sé específico para facilitar el contacto</span>
             </div>
           </div>
@@ -202,7 +216,8 @@
             </div>
             <div class="form-group full-width">
               <label for="descripcionSalud">Descripción adicional de salud o situación</label>
-              <textarea id="descripcionSalud" name="descripcionSalud" rows="3" placeholder="Describe lesiones, condición médica especial, necesidades urgentes, etc."></textarea>
+              <textarea id="descripcionSalud" name="descripcionSalud" rows="3"
+                placeholder="Describe lesiones, condición médica especial, necesidades urgentes, etc."></textarea>
             </div>
           </div>
         </div>
@@ -216,11 +231,13 @@
             </div>
             <div class="form-group required">
               <label for="reporterTelefono">Tu teléfono / contacto</label>
-              <input type="tel" id="reporterTelefono" name="reporterTelefono" placeholder="0412-1234567 o @usuario" required />
+              <input type="tel" id="reporterTelefono" name="reporterTelefono" placeholder="0412-1234567 o @usuario"
+                required />
             </div>
             <div class="form-group full-width">
               <label for="notasAdicionales">Notas adicionales</label>
-              <textarea id="notasAdicionales" name="notasAdicionales" rows="2" placeholder="Cualquier información adicional relevante…"></textarea>
+              <textarea id="notasAdicionales" name="notasAdicionales" rows="2"
+                placeholder="Cualquier información adicional relevante…"></textarea>
             </div>
           </div>
         </div>
@@ -252,7 +269,8 @@
       <div class="search-bar-container">
         <div class="search-bar">
           <span class="search-icon">🔍</span>
-          <input type="search" id="searchInput" placeholder="Buscar por nombre, cédula, estado, municipio…" aria-label="Buscar persona" />
+          <input type="search" id="searchInput" placeholder="Buscar por nombre, cédula, estado, municipio…"
+            aria-label="Buscar persona" />
           <button class="btn-search" onclick="performSearch()" id="btnBuscar">Buscar</button>
         </div>
         <div class="search-filters">
@@ -344,24 +362,30 @@
             </div>
             <div class="form-group">
               <label for="anuncioUbicacion">Última ubicación conocida</label>
-              <input type="text" id="anuncioUbicacion" name="anuncioUbicacion" placeholder="Municipio, sector, dirección" />
+              <input type="text" id="anuncioUbicacion" name="anuncioUbicacion"
+                placeholder="Municipio, sector, dirección" />
             </div>
             <div class="form-group required">
               <label for="anuncioDescripcion">Descripción / Señas particulares</label>
-              <textarea id="anuncioDescripcion" name="anuncioDescripcion" rows="4" placeholder="Describe a la persona: ropa que llevaba, señas físicas particulares, discapacidades, etc." required></textarea>
+              <textarea id="anuncioDescripcion" name="anuncioDescripcion" rows="4"
+                placeholder="Describe a la persona: ropa que llevaba, señas físicas particulares, discapacidades, etc."
+                required></textarea>
             </div>
             <div class="form-group required">
               <label for="anuncioContacto">Tu contacto (teléfono / red social)</label>
-              <input type="text" id="anuncioContacto" name="anuncioContacto" placeholder="0412-1234567 o @usuario en Twitter/Instagram" required />
+              <input type="text" id="anuncioContacto" name="anuncioContacto"
+                placeholder="0412-1234567 o @usuario en Twitter/Instagram" required />
             </div>
             <div class="form-group">
               <label for="anuncioNombreReporter">Tu nombre</label>
-              <input type="text" id="anuncioNombreReporter" name="anuncioNombreReporter" placeholder="Tu nombre completo" />
+              <input type="text" id="anuncioNombreReporter" name="anuncioNombreReporter"
+                placeholder="Tu nombre completo" />
             </div>
             <div class="form-footer">
               <div class="consent-check">
                 <input type="checkbox" id="anuncioConsentimiento" required />
-                <label for="anuncioConsentimiento">Confirmo que esta información es real y asumo responsabilidad.</label>
+                <label for="anuncioConsentimiento">Confirmo que esta información es real y asumo
+                  responsabilidad.</label>
               </div>
               <button type="submit" class="btn-primary" id="btnAnuncio">
                 <span class="btn-icon">📢</span> Publicar Anuncio
@@ -374,7 +398,8 @@
         <div class="anuncios-list-container">
           <h3>Anuncios publicados <span id="anunciosCount" class="count-badge">—</span></h3>
           <div class="search-bar mini">
-            <input type="search" id="anuncioSearch" placeholder="Buscar en anuncios…" oninput="filterAnuncios(this.value)" />
+            <input type="search" id="anuncioSearch" placeholder="Buscar en anuncios…"
+              oninput="filterAnuncios(this.value)" />
           </div>
           <div id="anunciosList" class="anuncios-list">
             <div class="loading-state">
@@ -390,25 +415,30 @@
     <section id="panel-config" class="tab-panel" role="tabpanel" aria-labelledby="tab-config">
       <div class="panel-header">
         <h2>⚙️ Configuración de Google Sheets</h2>
-        <p class="panel-desc">Conecta esta aplicación con una hoja de cálculo de Google Sheets para guardar y leer los datos.</p>
+        <p class="panel-desc">Conecta esta aplicación con una hoja de cálculo de Google Sheets para guardar y leer los
+          datos.</p>
       </div>
 
       <div class="config-card">
         <h3>🔗 Instrucciones de configuración</h3>
         <ol class="config-steps">
           <li>
-            <strong>Crea una hoja de cálculo en Google Drive</strong> y compártela públicamente (cualquier persona con el enlace puede ver y editar).
+            <strong>Crea una hoja de cálculo en Google Drive</strong> y compártela públicamente (cualquier persona con
+            el enlace puede ver y editar).
           </li>
           <li>
             <strong>Copia el ID de la hoja:</strong> es la parte de la URL entre <code>/d/</code> y <code>/edit</code>.
-            <br>Ejemplo: <code>https://docs.google.com/spreadsheets/d/<strong>1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms</strong>/edit</code>
+            <br>Ejemplo:
+            <code>https://docs.google.com/spreadsheets/d/<strong>1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms</strong>/edit</code>
           </li>
           <li>
-            <strong>Obtén una API Key de Google:</strong> ve a <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">Google Cloud Console</a>,
+            <strong>Obtén una API Key de Google:</strong> ve a <a href="https://console.cloud.google.com/"
+              target="_blank" rel="noopener">Google Cloud Console</a>,
             crea un proyecto, activa la API de Google Sheets, y crea una clave de API.
           </li>
           <li>
-            <strong>Crea un Apps Script</strong> (Extensiones → Apps Script en tu hoja de cálculo) y configura el Web App como se indica en el README.
+            <strong>Crea un Apps Script</strong> (Extensiones → Apps Script en tu hoja de cálculo) y configura el Web
+            App como se indica en el README.
           </li>
           <li>Pega tus datos abajo y haz clic en "Guardar configuración".</li>
         </ol>
@@ -596,7 +626,8 @@ function doGet(e) {
 
       <div class="config-card">
         <h3>⚠️ Modo de demostración</h3>
-        <p>Sin configuración guardada, la aplicación funcionará en <strong>modo demostración</strong> con datos de ejemplo locales. Los registros no se guardarán de forma permanente.</p>
+        <p>Sin configuración guardada, la aplicación funcionará en <strong>modo demostración</strong> con datos de
+          ejemplo locales. Los registros no se guardarán de forma permanente.</p>
         <button class="btn-secondary" onclick="loadMockData()" id="btnMockData">🗂️ Cargar datos de ejemplo</button>
       </div>
     </section>
@@ -627,8 +658,9 @@ function doGet(e) {
     <div class="modal-overlay" onclick="closeCommentModal()"></div>
     <div class="modal-box" style="text-align: left;">
       <h3 id="modalComentarioTitle">📝 Agregar un comentario / actualización</h3>
-      <p style="font-size: 0.9rem; color: var(--gray-600); margin-bottom: 1rem;">Agrega información nueva, avistamientos o correcciones.</p>
-      
+      <p style="font-size: 0.9rem; color: var(--gray-600); margin-bottom: 1rem;">Agrega información nueva, avistamientos
+        o correcciones.</p>
+
       <form id="commentForm" onsubmit="submitComment(event)">
         <input type="hidden" id="commentParentId" />
         <div class="form-group required">
@@ -665,4 +697,5 @@ function doGet(e) {
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>
 </body>
+
 </html>
