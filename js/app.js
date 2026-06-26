@@ -15,9 +15,10 @@ let anuncios  = [];
 let config = {
   sheetId:        '15o78St2GHdamibADpirj2XMRXngF0bcKZdNG5m2z96U', // Ej: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms'
   apiKey:         'AIzaSyC2AIGUswWNIwoerA8fqfE3kQJY2cl5xsQ', // Tu API Key de Google
-  webAppUrl:      'https://script.google.com/macros/s/AKfycbx8vyiZkddQy1xXip_dWtCcx1F9R4EAo38Aywj56DRrPQpaH4uK_qMxEVEIfzJ0f7AI/exec', // Ej: 'https://script.google.com/macros/s/.../exec'
+  webAppUrl:      'https://script.google.com/macros/s/AKfycbww3S3hKCE2Vn-ziED_3zgCHvn10Mh_ONuy5A0j7dE9IlxLagLrcwHkDHhoEWbO2NC_/exec', // Ej: 'https://script.google.com/macros/s/.../exec'
   sheetRegistros: 'Registros',
-  sheetAnuncios:  'Anuncios'
+  sheetAnuncios:  'Anuncios',
+  sheetComentarios: 'Comentarios'
 };
 
 let isMockMode = false;
